@@ -1,0 +1,244 @@
+Screen {
+    layers: log note_disactive footer sidebar;
+    background: $background-darken-1;
+    overflow-x: hidden;
+    overflow-y: hidden;
+}
+
+PlayArea {
+    opacity: 100%;
+    background: $surface;
+    layer: note_disactive;
+    border: outer $secondary;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    layout: grid;
+}
+
+Footer {
+    layer: footer;
+}
+
+Note {
+    layer: note_disactive;
+    background:; 
+    border: none;
+    text-style:;
+    rule: ;
+    padding: 0 0 0 0;
+    margin: 0;
+    height: 14;
+    min-height: 6;
+    width: 20;
+    overflow: hidden;
+    opacity: 0%;
+}
+
+Note Static {
+    background: $secondary-darken-1;
+    color: $text;
+    border: none;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    text-style:;
+    rule:;
+
+    border: none;
+    border-right: outer $secondary-darken-3;
+    border-left: outer $secondary-lighten-1;
+    border-top: none;
+    border-bottom: outer $secondary-darken-3;
+}
+
+#note-toper {
+    dock: top;
+    height: 4;
+}
+
+#note-top {
+    text-align: center;
+    background: $secondary;
+    border-top: outer $secondary-lighten-1;
+    border-left: outer $secondary-lighten-1;
+    border-bottom: none;
+    height: 3;
+}
+
+#spacer {
+    background: $secondary-darken-3;
+    color: $secondary-lighten-1;
+    border: none;
+    height: 1;
+    min-height: 1;
+}
+
+#resizer-left {
+    background: $secondary-darken-3;
+    color: $secondary-lighten-1;
+    border: none;
+    border-bottom: tall;
+    height: 1;
+    min-height: 1;
+    width: 1fr;
+    content-align: left bottom;
+}
+
+#resizer {
+    background: $secondary-darken-3;
+    color: $secondary-lighten-1;
+    border: none;
+    height: 1;
+    min-height: 1;
+    width: 2;
+    content-align: right bottom;
+}
+
+#note-resizer {
+    dock: bottom;
+    height: 1;
+
+}
+
+Sidebar {    
+    layer: sidebar;
+    dock: right;
+    width: 32;
+    height: 100%;
+    padding: 0 0 0 0;
+    border: outer $accent-darken-3;
+    transition: offset 500ms in_out_cubic;    
+    background: $panel;
+}
+
+Sidebar:focus-within {
+    offset: 0 0 !important;
+}
+
+Sidebar.-hidden {
+    offset-x: 100%;
+}
+
+#sidebar-title {
+    border: heavy $secondary;
+    padding: 0 2;
+    text-style: bold;
+}
+
+Sidebar MultilineArray {
+
+    background: $boost;
+    color: $text;
+    border: heavy $secondary-darken-3;
+    height: auto;
+    min-height: 1;
+}
+
+Sidebar MultilineInput {
+    border: none;
+}
+
+#delete-sticknote {
+    width: 100%;
+    height: 3;
+    background: $error;
+    margin: 0 1;
+}
+
+ColorPicker {
+    background: $panel;
+    /* background: $accent; */
+    border: tall $panel;
+    height: 15;
+    width: 1fr;
+}
+
+#color-picker-title {
+    border: heavy $primary-lighten-3;
+    padding: 0 2;
+    text-style: bold;
+    text-align: center;
+
+}
+
+ColorPickerDisplay {
+    background: $panel;
+    border: outer $panel-darken-3;
+    content-align: center middle;
+    padding: 0;
+    margin: 0 1 1 1;
+    color: $text;
+    text-style: bold;
+    height: 3;
+    width: 100%;
+}
+
+ColorPickerChanger {
+    /* content-align: center top; */
+    /* border-left: none; */
+    /* border-right: tall $panel; */
+    /* border-top: tall $panel-lighten-2; */
+    /* border-bottom: tall $panel-darken-3; */
+    /* background: $panel;  */ /* padding: 0; */ /* margin: 0 0 1 0; */
+    /* height: 4; */
+    /* width: 1fr; */
+    /* color: $text; */
+    grid-size: 3;
+    height: 2;
+    width: 8;
+    margin: 0 0 0 1;
+    /* border: tall; */
+}
+
+#color-changers {
+    margin: 2;
+    padding: 0;
+    margin: 0;
+    height: 3;
+    width: auto;
+}
+
+#random-color {
+    width: 100%;
+    height: 3;
+    padding: 0;
+    margin: 0;
+    background: $accent-darken-3;
+}
+
+#random-hor {
+    height: 3;
+    margin: 0 1;
+}
+
+ColorPickerChanger Static {
+    background: $primary;
+    row-span: 3;
+    column-span: 2;
+    min-width: 1;
+    min-height: 1;
+    height: 2;
+    width: 6;
+    color: $text;
+    border: none;
+    padding: 0;
+    margin: 0;
+    content-align: center top;
+    text-style: bold;
+    text-align: center;
+}
+
+ColorPickerChanger Button {
+    row-span: 1;
+    column-span: 1;
+    height: 1;
+    width: 3;
+    background: $accent;
+}
+ColorPickerChanger Button.-up {
+    background: $accent-lighten-1;
+}
+
+ColorPickerChanger Button.-down {
+    background: $accent-darken-3;
+}
