@@ -1,0 +1,6 @@
+[flake8]
+; ignore = F403, F401
+ignore = F403, F401, F841, F811, F541
+exclude = .git,__pycache__,old,build,dist,venv
+max-line-length = 88
+max-complexity = 18
