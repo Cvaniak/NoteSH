@@ -1,4 +1,5 @@
-from rich.console import RenderableType
+from __future__ import annotations
+
 from textual.app import ComposeResult
 from textual.color import Color
 from textual.containers import Grid, Horizontal, Vertical
@@ -20,26 +21,27 @@ class ColorPickerDisplay(Static):
 
 class ColorPickerChanger(Grid):
     value: reactive[int] = reactive(0)
-    def __init__(self, *children: Widget, name: str | None = None, id: str | None = None, classes: str | None = None, parent=None, color_arg="") -> None:
+
+    def __init__(
+        self,
+        *children: Widget,
+        name: str | None = None,
+        id: str | None = None,
+        classes: str | None = None,
+        parent=None,
+        color_arg="",
+    ) -> None:
         super().__init__(*children, name=name, id=id, classes=classes)
         self.pparent = parent
         self.argument = color_arg
-        self.static_widget =  Static("  ", classes="-color")
-        w = {"r":50, "g":50, "b": 50}
-        w.update({self.argument:210})
+        self.static_widget = Static("  ", classes="-color")
+        w = {"r": 50, "g": 50, "b": 50}
+        w.update({self.argument: 210})
         self.static_widget.styles.background = Color(**w)
         self.value = getattr(self.pparent, self.argument)
 
         self.button_up = Button("▲", id="up", classes="-up")
-        self.button_down =  Button("▼", id="down", classes="-down")
-
-    # def __init__(
-    #     self, renderable: RenderableType = "", parent=None, *args, **kwargs
-    # ) -> None:
-    #     super().__init__(renderable, *args, **kwargs)
-    #     self.pparent = parent
-    #     self.argument = renderable.lower()
-    #     self.value = getattr(self.pparent, self.argument)
+        self.button_down = Button("▼", id="down", classes="-down")
 
     def compose(self) -> ComposeResult:
         yield self.static_widget
@@ -87,9 +89,6 @@ class ColorPicker(Vertical):
         yield Static("Color Picker", id="color-picker-title")
         yield self.color_display
         self.color_changers = {
-            # "r": ColorPickerChanger(),
-            # "g": ColorPickerChanger(classes="changer"),
-            # "b": ColorPickerChanger(classes="changer"),
             "r": ColorPickerChanger(color_arg="r", parent=self, id="change-r"),
             "g": ColorPickerChanger(color_arg="g", parent=self, id="change-g"),
             "b": ColorPickerChanger(color_arg="b", parent=self, id="change-b"),

@@ -1,4 +1,5 @@
-from textual.app import ComposeResult
+from __future__ import annotations
+
 from textual.containers import Container
 from textual.geometry import Offset, Size
 from textual.widget import Widget
@@ -9,23 +10,34 @@ CHUNK_SIZE = Offset(20, 5)
 
 
 class PlayArea(Container):
-    notes = []
+    notes: list[Note] = []
     is_draggin = False
 
-    def __init__(self, *children: Widget, name: str | None = None, id: str | None = None, classes: str | None = None, min_size: Size = Size(0, 0), max_size: Size = Size(100, 40), screen_size: Size | None = None) -> None:
+    def __init__(
+        self,
+        *children: Widget,
+        name: str | None = None,
+        id: str | None = None,
+        classes: str | None = None,
+        min_size: Size = Size(0, 0),
+        max_size: Size = Size(100, 40),
+        screen_size: Size | None = None,
+    ) -> None:
         super().__init__(*children, name=name, id=id, classes=classes)
-        calculated_width =((max_size.width-min_size.width+1)//CHUNK_SIZE.x)*CHUNK_SIZE.x + CHUNK_SIZE.x 
-        calculated_height =((max_size.height-min_size.height+1)//CHUNK_SIZE.y)*CHUNK_SIZE.y + CHUNK_SIZE.y
+        calculated_width = ((max_size.width - min_size.width + 1) // CHUNK_SIZE.x) * CHUNK_SIZE.x + CHUNK_SIZE.x
+        calculated_height = ((max_size.height - min_size.height + 1) // CHUNK_SIZE.y) * CHUNK_SIZE.y + CHUNK_SIZE.y
         self.styles.width = calculated_width
         self.styles.height = calculated_height
-        self.offset += Offset((screen_size.width-calculated_width)//2, (screen_size.height-calculated_height)//2)
+        self.offset += Offset(
+            (screen_size.width - calculated_width) // 2, (screen_size.height - calculated_height) // 2
+        )
 
     def add_new_note(
         self,
         note_id: str = "",
         title: str = "",
         body: str = "",
-        color: float = "#ffaa00",
+        color: str = "#ffaa00",
         pos: Offset = Offset(0, 0),
         size: Size = Size(20, 14),
     ) -> None:
@@ -46,7 +58,7 @@ class PlayArea(Container):
         while self.notes:
             self.notes.pop().remove()
 
-    def delete_sticknote(self, sticknote) -> None:
+    def delete_sticknote(self, sticknote: Note) -> None:
         self.notes = [note for note in self.notes if note != sticknote]
         sticknote.remove()
 
@@ -79,6 +91,6 @@ class PlayArea(Container):
 
         if note.region.y <= self.region.y:
             self.styles.height = self.styles.height.value + CHUNK_SIZE.y
-            self.styles.offset = (self.styles.offset.x.value, self.styles.offset.y.value- CHUNK_SIZE.y)
+            self.styles.offset = (self.styles.offset.x.value, self.styles.offset.y.value - CHUNK_SIZE.y)
             for child in self.children:
                 child.styles.offset = (child.styles.offset.x.value, child.styles.offset.y.value + CHUNK_SIZE.y)

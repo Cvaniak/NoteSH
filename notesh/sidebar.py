@@ -1,12 +1,12 @@
+from __future__ import annotations
+from typing import Optional
+
 from textual.app import ComposeResult
 from textual.binding import Binding
-from textual.color import Color
 from textual.containers import Vertical
-from textual.events import MouseScrollDown, MouseScrollUp
 from textual.message import Message, MessageTarget
-from textual.reactive import reactive
 from textual.widget import Widget
-from textual.widgets import Button, Input, Static
+from textual.widgets import Button, Input
 from notesh.color_picker import ColorPicker
 from notesh.sticknote import Note
 from notesh.play_area import PlayArea
@@ -83,14 +83,12 @@ class MultilineArray(Vertical):
                 return
             self.screen.set_focus(self.lines[idx + 1])
 
-    def recreate_multiline(self, value):
+    def recreate_multiline(self, value: str) -> None:
         while self.lines:
             self.lines.pop().remove()
 
         for line in value.split("  \n"):
-            self.lines.append(
-                MultilineInput(line, id=f"sidebar-input-{len(self.lines)}")
-            )
+            self.lines.append(MultilineInput(line, id=f"sidebar-input-{len(self.lines)}"))
             self.mount(self.lines[-1])
 
 
@@ -103,7 +101,7 @@ class Sidebar(Vertical):
         classes: str | None = None,
     ) -> None:
         super().__init__(*children, name=name, id=id, classes=classes)
-        self.stick_note: Note = None
+        self.stick_note: Optional[Note] = None
 
     def compose(self) -> ComposeResult:
         self.title_input = Input("Title", id="sidebar-title")
@@ -143,9 +141,7 @@ class Sidebar(Vertical):
             if not self.stick_note:
                 return
             self.emit_no_wait(DeleteSticknote(self, self.stick_note))
-            self.screen.query_one(PlayArea).emit_no_wait(
-                DeleteSticknote(self, self.stick_note)
-            )
+            self.screen.query_one(PlayArea).emit_no_wait(DeleteSticknote(self, self.stick_note))
             self.refresh()
 
     def on_color_picker_change(self, message: ColorPicker.Change):

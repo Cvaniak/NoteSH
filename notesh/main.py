@@ -1,6 +1,10 @@
+from __future__ import annotations
+
 import os
+import sys
 from typing import Type
 from textual.app import App, CSSPathType, ComposeResult
+from textual.binding import Binding
 from textual.driver import Driver
 from textual.geometry import Offset, Size
 
@@ -15,13 +19,13 @@ class NoteApp(App):
     CSS_PATH = "main.css"
 
     BINDINGS = [
-        ("ctrl+c", "quit", "Quit"),
-        ("ctrl+q", "quit", "Quit"),
-        ("ctrl+b", "toggle_sidebar", "Sidebar"),
-        ("ctrl+a", "add_note", "Create Stick Note"),
-        ("ctrl+s", "save_notes", "Saves Notes"),
-        ("ctrl+w", "load_notes", "Load Notes"),
-        ("ctrl+t", "app.toggle_dark", "Toggle Dark mode"),
+        Binding("ctrl+c", "quit", "Quit"),
+        Binding("ctrl+q", "quit", "Quit"),
+        Binding("ctrl+b", "toggle_sidebar", "Sidebar"),
+        Binding("ctrl+a", "add_note", "Create Stick Note"),
+        Binding("ctrl+s", "save_notes", "Saves Notes"),
+        Binding("ctrl+w", "load_notes", "Load Notes"),
+        Binding("ctrl+t", "app.toggle_dark", "Toggle Dark mode"),
     ]
 
     def __init__(
@@ -29,7 +33,7 @@ class NoteApp(App):
         driver_class: Type[Driver] | None = None,
         css_path: CSSPathType = None,
         watch_css: bool = False,
-        file="notes.json",
+        file: str="notes.json",
     ):
         super().__init__(driver_class, css_path, watch_css)
         self.file = file
@@ -38,7 +42,7 @@ class NoteApp(App):
         self.sidebar = Sidebar(classes="-hidden")
         yield self.sidebar
         min_size, max_size = self.new_size()
-        self.play_area = PlayArea(min_size=min_size, max_size=max_size, screen_size = self.size)
+        self.play_area = PlayArea(min_size=min_size, max_size=max_size, screen_size=self.size)
         self.action_load_notes(min_size)
         yield self.play_area
         yield Footer()
@@ -58,9 +62,7 @@ class NoteApp(App):
             sidebar.add_class("-hidden")
 
     async def on_note_focus(self, message: Note.Focus):
-        self.sidebar.set_stick_note(
-            self.screen.get_widget_by_id(message.index), message.display_sidebar
-        )
+        self.sidebar.set_stick_note(self.screen.get_widget_by_id(message.index), message.display_sidebar)
 
     def action_save_notes(self):
         obj = {"layers": []}
@@ -89,22 +91,21 @@ class NoteApp(App):
         with open(self.file, "r") as file:
             obj = json.load(file)
 
-
         keys = list(obj.keys())
         keys.remove("layers")
 
-        mxx, mxy = float("-inf"), float("-inf")
-        mnx, mny = float("inf"), float("inf")
+        mxx, mxy = -sys.maxsize, -sys.maxsize
+        mnx, mny = sys.maxsize, sys.maxsize
         for note in sorted(keys, key=lambda x: obj["layers"].index(x)):
-            mxx = max(mxx,obj[note]["pos"][0]+obj[note]["size"][0])
-            mnx = min(mnx,obj[note]["pos"][0])
-            mxy = max(mxy,obj[note]["pos"][1]+obj[note]["size"][1])
-            mny = min(mny,obj[note]["pos"][1])
+            mxx = max(mxx, obj[note]["pos"][0] + obj[note]["size"][0])
+            mnx = min(mnx, obj[note]["pos"][0])
+            mxy = max(mxy, obj[note]["pos"][1] + obj[note]["size"][1])
+            mny = min(mny, obj[note]["pos"][1])
 
-        mxx = 50 if mxx == float("-inf") else max(mxx, 50)
-        mxy = 20 if mxy == float("-inf") else max(mxy, 20)
-        mnx = 0 if mnx == float("inf") else mnx
-        mny = 0 if mny == float("inf") else mny
+        mxx = 50 if mxx == sys.maxsize else max(mxx, 50)
+        mxy = 20 if mxy == sys.maxsize else max(mxy, 20)
+        mnx = 0 if mnx == sys.maxsize else mnx
+        mny = 0 if mny == sys.maxsize else mny
 
         return Size(mnx, mny), Size(mxx, mxy)
 
@@ -122,24 +123,23 @@ class NoteApp(App):
         keys = list(obj.keys())
         keys.remove("layers")
         for note in sorted(keys, key=lambda x: obj["layers"].index(x)):
-            print("Hejo", Offset(*obj[note]["pos"]),Offset(min_size.width, min_size.height))
+            print("Hejo", Offset(*obj[note]["pos"]), Offset(min_size.width, min_size.height))
             self.play_area.add_new_note(
                 note_id=note,
                 title=obj[note]["title"],
                 body=obj[note]["body"],
                 color=obj[note]["color"],
-                pos=Offset(*obj[note]["pos"])-Offset(min_size.width, min_size.height),
+                pos=Offset(*obj[note]["pos"]) - Offset(min_size.width, min_size.height),
                 size=Size(*obj[note]["size"]),
             )
         self.refresh()
 
-    def action_quit(self):
+    async def action_quit(self) -> None:
         self.action_save_notes()
         self.exit()
 
-    def on_delete_sticknote(self, message: DeleteSticknote):
+    def on_delete_sticknote(self, message: DeleteSticknote) -> None:
         self.play_area.delete_sticknote(message.sticknote)
-        # self.action_toggle_sidebar()
 
 
 if __name__ == "__main__":
