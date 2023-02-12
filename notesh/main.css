@@ -1,5 +1,5 @@
 Screen {
-    layers: log note_disactive footer sidebar;
+    layers: log note_disactive footer sidebar topper;
     background: $background-darken-1;
     overflow-x: hidden;
     overflow-y: hidden;
@@ -65,7 +65,7 @@ Note Static {
     height: 3;
 }
 
-#spacer {
+#note-spacer {
     background: $secondary-darken-3;
     color: $secondary-lighten-1;
     border: none;
@@ -73,7 +73,7 @@ Note Static {
     min-height: 1;
 }
 
-#resizer-left {
+#note-resizer-left {
     background: $secondary-darken-3;
     color: $secondary-lighten-1;
     border: none;
@@ -84,7 +84,7 @@ Note Static {
     content-align: left bottom;
 }
 
-#resizer {
+#note-resizer {
     background: $secondary-darken-3;
     color: $secondary-lighten-1;
     border: none;
@@ -94,7 +94,7 @@ Note Static {
     content-align: right bottom;
 }
 
-#note-resizer {
+#note-resizer-bar {
     dock: bottom;
     height: 1;
 
@@ -125,8 +125,7 @@ Sidebar.-hidden {
     text-style: bold;
 }
 
-Sidebar MultilineArray {
-
+MultilineArray {
     background: $boost;
     color: $text;
     border: heavy $secondary-darken-3;
@@ -134,23 +133,66 @@ Sidebar MultilineArray {
     min-height: 1;
 }
 
-Sidebar MultilineInput {
+
+MultilineInput {
     border: none;
 }
 
-#delete-sticknote {
+Sidebar Button {
     width: 100%;
     height: 3;
-    background: $error;
     margin: 0 1;
 }
 
+
+Sidebar MultilineArray.-hidden {
+    min-height: 0;
+    min-width: 0;
+    height: 0;
+    width: 0;
+    border: none;
+    visibility: hidden;
+    dock: bottom;
+}
+
+Sidebar ColorPicker.-hidden {
+    min-height: 0;
+    min-width: 0;
+    height: 0;
+    width: 0;
+    border: none;
+    visibility: hidden;
+    dock: bottom;
+}
+
+Sidebar Input.-hidden {
+    min-height: 0;
+    min-width: 0;
+    height: 0;
+
+    width: 0;
+    border: none;
+    padding: 0;
+    visibility: hidden;
+    dock: bottom;
+}
+
+Sidebar Button.-hidden {
+    min-height: 0;
+    min-width: 0;
+    height: 0;
+    width: 0;
+    border: none;
+    visibility: hidden;
+    dock: bottom;
+}
+
 ColorPicker {
+    align-horizontal: center;
     background: $panel;
     /* background: $accent; */
-    border: tall $panel;
-    height: 15;
-    width: 1fr;
+    height: auto;
+    margin: 0 0 0 0;
 }
 
 #color-picker-title {
@@ -163,52 +205,42 @@ ColorPicker {
 
 ColorPickerDisplay {
     background: $panel;
-    border: outer $panel-darken-3;
+    /* border: outer $panel-darken-3; */
+    border-bottom: outer $panel-darken-3;
     content-align: center middle;
     padding: 0;
-    margin: 0 1 1 1;
+    margin: 0 1 0 1;
     color: $text;
     text-style: bold;
-    height: 3;
+    height: 2;
     width: 100%;
 }
 
 ColorPickerChanger {
-    /* content-align: center top; */
-    /* border-left: none; */
-    /* border-right: tall $panel; */
-    /* border-top: tall $panel-lighten-2; */
-    /* border-bottom: tall $panel-darken-3; */
-    /* background: $panel;  */ /* padding: 0; */ /* margin: 0 0 1 0; */
-    /* height: 4; */
-    /* width: 1fr; */
-    /* color: $text; */
     grid-size: 3;
     height: 2;
     width: 8;
-    margin: 0 0 0 1;
-    /* border: tall; */
 }
 
 #color-changers {
-    margin: 2;
     padding: 0;
-    margin: 0;
-    height: 3;
+    margin: 0 0 1 1;
+    height: 2;
     width: auto;
 }
 
 #random-color {
-    width: 100%;
+    min-width: 1;
+    min-height: 1;
+    width: 4;
     height: 3;
     padding: 0;
     margin: 0;
-    background: $accent-darken-3;
-}
-
-#random-hor {
-    height: 3;
-    margin: 0 1;
+    background: black;
+    color: white;
+    border: none;
+    align-horizontal: center;
+    content-align: center top;
 }
 
 ColorPickerChanger Static {
@@ -226,6 +258,7 @@ ColorPickerChanger Static {
     content-align: center top;
     text-style: bold;
     text-align: center;
+    align-horizontal: center;
 }
 
 ColorPickerChanger Button {
@@ -235,10 +268,55 @@ ColorPickerChanger Button {
     width: 3;
     background: $accent;
 }
+
 ColorPickerChanger Button.-up {
     background: $accent-lighten-1;
 }
 
 ColorPickerChanger Button.-down {
     background: $accent-darken-3;
+}
+
+Sidebar #border-picker {
+    margin: 0 1 1 1;
+}
+
+Drawable {
+    background: $error;
+    min-width: 4;
+    min-height: 3;
+    color: $text;
+    /* border: outer $primary; */
+    /* border-bottom: outer $primary; */
+    overflow-x: hidden;
+    overflow-y: hidden;
+}
+
+Drawable #default-body {
+    color: $text;
+    background: $panel;
+    min-width: 4;
+    min-height: 1;
+    border: outer $primary;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: hidden;
+}
+
+Drawable Resizer{
+    opacity: 100%;
+    color: $error;
+    dock: bottom;
+    height: 1;
+    width: 2;
+    min-height: 1;
+    min-width: 1;
+    align-horizontal: right;
+    border: none;
+    overflow-x: hidden;
+    overflow-y: hidden;
+}
+
+Drawable Resizer:hover{
+    opacity: 80%;
 }

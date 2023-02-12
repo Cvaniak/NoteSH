@@ -1,16 +1,21 @@
 from __future__ import annotations
 
+from typing import Any, cast
+
 from textual.containers import Container
+from textual.events import MouseDown, MouseMove, MouseUp
 from textual.geometry import Offset, Size
 from textual.widget import Widget
-from notesh.sticknote import Note
-from textual.events import MouseDown, MouseMove, MouseUp
+
+from notesh.drawables.box import Box
+from notesh.drawables.drawable import Drawable
+from notesh.drawables.sticknote import Note
 
 CHUNK_SIZE = Offset(20, 5)
 
 
 class PlayArea(Container):
-    notes: list[Note] = []
+    drawables: list[Drawable] = []
     is_draggin = False
 
     def __init__(
@@ -32,34 +37,39 @@ class PlayArea(Container):
             (screen_size.width - calculated_width) // 2, (screen_size.height - calculated_height) // 2
         )
 
-    def add_new_note(
-        self,
-        note_id: str = "",
-        title: str = "",
-        body: str = "",
-        color: str = "#ffaa00",
-        pos: Offset = Offset(0, 0),
-        size: Size = Size(20, 14),
-    ) -> None:
-        note: Note = Note(
-            id=f"{note_id}",
-            title=title,
-            body=body,
-            color=color,
-            position=pos,
-            size=size,
-            parent=self,
-        )
-        self.notes.append(note)
+    def add_new_drawable(self, drawable_type: str) -> None:
+
+        if drawable_type == "note":
+            note: Drawable = cast(Drawable, Note())
+        elif drawable_type == "box":
+            note: Drawable = cast(Drawable, Box())
+        else:
+            note: Drawable = Drawable()
+
+        self.drawables.append(note)
         self.mount(note)
         self.is_draggin = False
 
-    def remove_notes(self) -> None:
-        while self.notes:
-            self.notes.pop().remove()
+    def add_parsed_drawable(self, obj: dict[Any, Any], drawable_id: str, offset: Offset = Offset(0, 0)) -> None:
+        drawable_type = obj["type"]
 
-    def delete_sticknote(self, sticknote: Note) -> None:
-        self.notes = [note for note in self.notes if note != sticknote]
+        if drawable_type == "note":
+            note: Drawable = cast(Drawable, Note.load(obj, drawable_id, offset))
+        elif drawable_type == "box":
+            note: Drawable = cast(Drawable, Box.load(obj, drawable_id, offset))
+        else:
+            note: Drawable = Drawable.load(obj, drawable_id, offset)
+
+        self.drawables.append(note)
+        self.mount(note)
+        self.is_draggin = False
+
+    def remove_drawables(self) -> None:
+        while self.drawables:
+            self.drawables.pop().remove()
+
+    def delete_drawable(self, sticknote: Drawable) -> None:
+        self.drawables = [note for note in self.drawables if note != sticknote]
         sticknote.remove()
 
     def on_mouse_move(self, event: MouseMove) -> None:
@@ -75,8 +85,8 @@ class PlayArea(Container):
         self.is_draggin = False
         self.capture_mouse(False)
 
-    async def on_note_move(self, event: Note.Move) -> None:
-        note = event.note
+    async def on_drawable_move(self, event: Drawable.Move) -> None:
+        note = event.drawable
         if note.region.right >= self.region.right:
             self.styles.width = self.styles.width.value + CHUNK_SIZE.x
 

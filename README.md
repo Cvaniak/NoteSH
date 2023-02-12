@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
- Fully functional sticky notes App in your Terminal! Built with <a href="https://github.com/Textualize/textual">Textual</a> amazing TUI framework!
+ Fully functional sticky notes App in your Terminal! Built with <a href="https://github.com/Textualize/textual">Textual</a>, an amazing TUI framework!
 </p>
 
 <p align="center">
@@ -12,9 +12,11 @@
 
 ## Installation
 
-To install just type in your terminal ( for `Python 3.7+`):
+Best option to install is using [pipx](https://github.com/pypa/pipx):
 
 ```bash
+pipx install notesh
+# but it is still possible to do it with just pip:
 pip install notesh
 ```
 
@@ -61,6 +63,36 @@ notesh -f ~/Documents/MyNotes.json
 * You can also click `CTRL-Mouse` to look around whole wall
 
 ![Resize Background](https://raw.githubusercontent.com/Cvaniak/NoteSH/master/documentation/DynamicResize.gif)
+
+## NEW FEATURES
+
+## 💡 Highlight when mouse is over
+
+![Resize Background](https://raw.githubusercontent.com/Cvaniak/NoteSH/master/documentation/HoverOver.gif)
+
+## ➕ New Drawable that support borders change
+
+![Resize Background](https://raw.githubusercontent.com/Cvaniak/NoteSH/master/documentation/NewDrawable.png)
+
+## TODO
+
+There are many thigs to add! If you have idea, please create Issue with your suggestions.
+
+* [ ] Safe saving (now if there are any bugs you may lost your notes)
+* [ ] Vim Key bindings
+* [ ] Duplicate Note
+* [ ] Hiding menu (Color Picker etc.)
+* [ ] TOML config file
+* [ ] Left Sidebar (for background and preferences)
+* [ ] Align tool for text
+* [ ] Fixed layers (if needed)
+* [ ] Diffrent Drawables:
+  * [ ] Check List
+  * [ ] Arrows
+
+and also resolve problems:
+
+* [ ] Multiline Input (currently textual does not support it and here we have my hacky solution)  
 
 ## Thanks
 

@@ -1,18 +1,19 @@
 from __future__ import annotations
 
+import json
 import os
 import sys
-from typing import Type
-from textual.app import App, CSSPathType, ComposeResult
+from typing import Any, Type
+
+from textual.app import App, ComposeResult, CSSPathType
 from textual.binding import Binding
 from textual.driver import Driver
 from textual.geometry import Offset, Size
-
-from notesh.play_area import PlayArea
 from textual.widgets import Footer
-from notesh.sticknote import Note
-from notesh.sidebar import DeleteSticknote, Sidebar
-import json
+
+from notesh.drawables.drawable import Drawable
+from notesh.play_area import PlayArea
+from notesh.widgets.sidebar import DeleteDrawable, Sidebar
 
 
 class NoteApp(App):
@@ -23,8 +24,8 @@ class NoteApp(App):
         Binding("ctrl+q", "quit", "Quit"),
         Binding("ctrl+b", "toggle_sidebar", "Sidebar"),
         Binding("ctrl+a", "add_note", "Create Stick Note"),
+        Binding("ctrl+x", "add_box", "Create Box"),
         Binding("ctrl+s", "save_notes", "Saves Notes"),
-        Binding("ctrl+w", "load_notes", "Load Notes"),
         Binding("ctrl+t", "app.toggle_dark", "Toggle Dark mode"),
     ]
 
@@ -33,7 +34,7 @@ class NoteApp(App):
         driver_class: Type[Driver] | None = None,
         css_path: CSSPathType = None,
         watch_css: bool = False,
-        file: str="notes.json",
+        file: str = "notes.json",
     ):
         super().__init__(driver_class, css_path, watch_css)
         self.file = file
@@ -46,43 +47,28 @@ class NoteApp(App):
         self.action_load_notes(min_size)
         yield self.play_area
         yield Footer()
-        # print(self.size, "BAS"*10)
 
     def action_add_note(self) -> None:
-        self.play_area.add_new_note()
+        self.play_area.add_new_drawable("note")
+
+    def action_add_drawable(self) -> None:
+        self.play_area.add_new_drawable("drawable")
+
+    def action_add_box(self) -> None:
+        self.play_area.add_new_drawable("box")
 
     def action_toggle_sidebar(self) -> None:
         sidebar = self.sidebar
-        self.set_focus(None)
+
         if sidebar.has_class("-hidden"):
             sidebar.remove_class("-hidden")
         else:
-            if sidebar.query("*:focus"):
-                self.screen.set_focus(None)
             sidebar.add_class("-hidden")
 
-    async def on_note_focus(self, message: Note.Focus):
-        self.sidebar.set_stick_note(self.screen.get_widget_by_id(message.index), message.display_sidebar)
-
-    def action_save_notes(self):
-        obj = {"layers": []}
-        layers_set = set()
-        note: Note
-        for note in self.play_area.notes:
-            obj[note.id] = {
-                "title": note.title.body,
-                "body": note.body.body,
-                "pos": (note.styles.offset.x.value, note.styles.offset.y.value),
-                "color": note.color.hex6,
-                "size": (note.styles.width.value, note.styles.height.value),
-                "type": "note",
-            }
-            layers_set.add(note.id)
-
-        obj["layers"].extend([x for x in self.screen.layers if x in layers_set])
-
-        with open(self.file, "w") as file:
-            json.dump(obj, file)
+    async def on_drawable_focus(self, message: Drawable.Focus):
+        drawable = self.screen.get_widget_by_id(message.index)
+        if isinstance(drawable, Drawable):
+            await self.sidebar.set_drawable(drawable, message.display_sidebar)
 
     def new_size(self):
         if not os.path.exists(self.file):
@@ -109,6 +95,21 @@ class NoteApp(App):
 
         return Size(mnx, mny), Size(mxx, mxy)
 
+    def action_save_notes(self):
+        obj: dict[str, Any] = {"layers": []}
+        layers_set: set[str] = set()
+        drawable: Drawable
+        for drawable in self.play_area.drawables:
+            if drawable.id is None:
+                continue
+            obj[drawable.id] = drawable.dump()
+            layers_set.add(drawable.id)
+
+        obj["layers"].extend([x for x in self.screen.layers if x in layers_set])
+
+        with open(self.file, "w") as file:
+            json.dump(obj, file)
+
     def action_load_notes(self, min_size: Size = Size(0, 0)):
         if not os.path.exists(self.file):
             return
@@ -118,28 +119,21 @@ class NoteApp(App):
 
         if not obj:
             return
-        self.play_area.remove_notes()
+        self.play_area.remove_drawables()
 
         keys = list(obj.keys())
         keys.remove("layers")
-        for note in sorted(keys, key=lambda x: obj["layers"].index(x)):
-            print("Hejo", Offset(*obj[note]["pos"]), Offset(min_size.width, min_size.height))
-            self.play_area.add_new_note(
-                note_id=note,
-                title=obj[note]["title"],
-                body=obj[note]["body"],
-                color=obj[note]["color"],
-                pos=Offset(*obj[note]["pos"]) - Offset(min_size.width, min_size.height),
-                size=Size(*obj[note]["size"]),
-            )
+        for drawable in sorted(keys, key=lambda x: obj["layers"].index(x)):
+            self.play_area.add_parsed_drawable(obj[drawable], drawable, Offset(min_size.width, min_size.height))
+
         self.refresh()
 
     async def action_quit(self) -> None:
         self.action_save_notes()
         self.exit()
 
-    def on_delete_sticknote(self, message: DeleteSticknote) -> None:
-        self.play_area.delete_sticknote(message.sticknote)
+    def on_delete_drawable(self, message: DeleteDrawable) -> None:
+        self.play_area.delete_drawable(message.drawable)
 
 
 if __name__ == "__main__":
