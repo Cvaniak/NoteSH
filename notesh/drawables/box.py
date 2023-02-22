@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 from typing import Any, Optional, OrderedDict, Type, TypeVar
-from textual.app import events
 
+from textual.app import events
 from textual.color import Color
 from textual.geometry import Offset, Size
 from textual.reactive import reactive
@@ -46,6 +46,7 @@ class Box(Drawable):
         super().__init__(id=id, init_parts=False, color=color, pos=pos, parent=parent, size=size, body=body)
 
         self.border_color = Color.parse(border_color)
+        self._last_border_color = self.border_color
         self.border_index = BORDERS.index(border_type)
         self.border_type = BORDERS[self.border_index]
         self._body = body
@@ -120,7 +121,7 @@ class Box(Drawable):
             "body": self.body.body,
             "pos": (self.styles.offset.x.value, self.styles.offset.y.value),
             "color": self.color.hex6,
-            "border_color": self.border_color.hex6,
+            "border_color": self._last_border_color.hex6,
             "border_type": self.border_type,
             "size": (self.styles.width.value, self.styles.height.value),
             "type": self.type,

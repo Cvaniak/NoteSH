@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Optional, OrderedDict, Type, TypeVar
+from typing import Any, Optional, OrderedDict, Type, TypeVar, cast
 
 from rich.markdown import Markdown
 from textual import events
@@ -20,6 +20,7 @@ _T = TypeVar("_T")
 
 
 class Drawable(Static):
+    can_focus: bool = True
     type: str = "drawable"
 
     def __init__(
@@ -39,6 +40,7 @@ class Drawable(Static):
         self.clicked = (0, 0)
         self.styles.layer = f"{id}"
         self.color = Color.parse(color)
+        self._last_color = self.color
         self.styles.offset = pos
         self.styles.width = size.width
         self.styles.height = size.height
@@ -62,7 +64,7 @@ class Drawable(Static):
         yield from self.drawable_body()
 
         self.change_color(self.color, duration=0.0)
-        self.screen.styles.layers = self.screen.styles.layers + (f"{self.styles.layer}", f"{self.styles.layer}-resizer")
+        self.bring_forward()
 
     def change_color(self, new_color: str | Color, duration: float = 1.0, part_type: str = "body") -> None:
         if isinstance(new_color, str):
@@ -83,28 +85,40 @@ class Drawable(Static):
         self.body.styles.border_top = ("outer", base_color.lighten(0.1))
         self.resizer.styles.animate("background", value=base_color.darken(0.1), duration=duration)
 
+    async def drawable_is_moved_from_key(self, offset: Offset):
+        note = self
+        note.offset = note.offset + offset
+        await self.emit(Drawable.Move(self, drawable=self, offset=offset))
+
+    async def move(self, direction: str, value: int = 1):
+        d = {"up": (0, -1), "down": (0, 1), "left": (-1, 0), "right": (1, 0)}
+        offset = Offset(*d[direction]) * value
+        await self.drawable_is_moved_from_key(offset)
+
     async def drawable_is_moved(self, event: events.MouseMove):
         if self.clicked is not None and event.button != 0:
             note = self
             if event.delta:
                 note.offset = note.offset + event.delta
-                await self.emit(Drawable.Move(self, drawable=self))
+                await self.emit(Drawable.Move(self, drawable=self, offset=event.delta))
 
     async def drawable_is_focused(self, event: events.MouseEvent, display_sidebar: bool = False):
         self.clicked = event.offset
-        layers = tuple(x for x in self.screen.styles.layers if x != self.layer)
-        self.screen.styles.layers = layers + (self.styles.layer,)
+        self.bring_forward()
         await self.emit(Drawable.Focus(self, self.note_id, display_sidebar))
 
     async def drawable_is_unfocused(self, event: events.MouseUp) -> None:
         self.clicked = None
 
+    async def resize_drawable(self, delta_x: int, delta_y: int):
+        note = self
+        note.styles.width = note.styles.width.value + delta_x
+        note.styles.height = note.styles.height.value + delta_y
+        note.refresh()
+
     async def drawable_is_resized(self, event: events.MouseMove) -> None:
         if self.clicked is not None and event.button != 0:
-            note = self
-            note.styles.width = note.styles.width.value + event.delta_x
-            note.styles.height = note.styles.height.value + event.delta_y
-            note.refresh()
+            await self.resize_drawable(event.delta_x, event.delta_y)
 
     async def on_mouse_move(self, event: events.MouseMove) -> None:
         await self.drawable_is_moved(event)
@@ -120,7 +134,15 @@ class Drawable(Static):
         await self.drawable_is_unfocused(event)
 
     async def on_click(self, event: events.Click):
-        await self.drawable_is_focused(event, True)
+        await self.emit(Drawable.Clicked(self, drawable=self))
+        event.stop()
+
+    async def on_focus(self, event: events.Focus):
+        await self.on_enter(cast(events.Enter, event))
+        await self.emit(Drawable.Focus(self, self.note_id, False))
+
+    async def on_blur(self, event: events.Blur):
+        await self.on_leave(cast(events.Leave, event))
 
     async def on_enter(self, event: events.Enter):
         if self.is_entered == False:
@@ -134,6 +156,14 @@ class Drawable(Static):
     async def on_leave(self, event: events.Leave):
         self.is_entered = False
         self.change_color(self._last_color, duration=0.1)
+
+    def bring_forward(self):
+        layers = tuple(x for x in self.screen.styles.layers if x not in [self.layer, f"{self.layer}-resizer"])
+        self.screen.styles.layers = layers + (self.styles.layer, f"{self.styles.layer}-resizer")
+
+    def bring_backward(self):
+        layers = tuple(x for x in self.screen.styles.layers if x not in [self.layer, f"{self.layer}-resizer"])
+        self.screen.styles.layers = (f"{self.styles.layer}", f"{self.styles.layer}-resizer") + layers
 
     def input_changed(self, event: Input.Changed):
         ...
@@ -151,7 +181,7 @@ class Drawable(Static):
         return {
             "body": self.body.body,
             "pos": (self.styles.offset.x.value, self.styles.offset.y.value),
-            "color": self.color.hex6,
+            "color": self._last_color.hex6,
             "size": (self.styles.width.value, self.styles.height.value),
             "type": self.type,
         }
@@ -181,7 +211,20 @@ class Drawable(Static):
         def __init__(
             self,
             sender: MessageTarget,
-            drawable: "Drawable",
+            drawable: Drawable,
+            offset: Offset,
+        ) -> None:
+            super().__init__(sender)
+            self.drawable = drawable
+            # this offset is used because when we update drawable offset
+            # it does not update region and style until first idle
+            self.offset = offset
+
+    class Clicked(Message):
+        def __init__(
+            self,
+            sender: MessageTarget,
+            drawable: Drawable,
         ) -> None:
             super().__init__(sender)
             self.drawable = drawable

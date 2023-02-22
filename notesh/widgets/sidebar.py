@@ -22,6 +22,8 @@ class DeleteDrawable(Message):
 
 
 class Sidebar(Vertical):
+    can_focus_children: bool = False
+
     def __init__(
         self,
         *children: Widget,
@@ -64,12 +66,14 @@ class Sidebar(Vertical):
         if self.drawable is not None:
             self.drawable.sidebar_layout(self.widget_list)
 
-    async def set_drawable(self, drawable: Drawable, display_sidebar: bool = False):
+    async def set_drawable(self, drawable: Optional[Drawable], display_sidebar: bool = False):
         self.drawable = drawable
         self.change_sidebar()
 
-        if display_sidebar and self.has_class("-hidden"):
-            self.remove_class("-hidden")
+        if self.drawable is None:
+            self.set_focus(False)
+        elif display_sidebar:
+            self.set_focus(True)
         self.refresh()
 
     async def on_input_changed(self, event: Input.Changed):
@@ -96,3 +100,19 @@ class Sidebar(Vertical):
 
     def on_color_picker_change(self, message: ColorPicker.Change):
         self.change_drawable_color(message.color, message.type)
+
+    def toggle_focus(self) -> bool:
+        if self.has_class("-hidden"):
+            self.set_focus(True)
+            return True
+        else:
+            self.set_focus(False)
+            return False
+
+    def set_focus(self, focus: bool):
+        if focus is True:
+            self.remove_class("-hidden")
+            self.can_focus_children = True
+        else:
+            self.add_class("-hidden")
+            self.can_focus_children = False

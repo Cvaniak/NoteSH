@@ -1,0 +1,39 @@
+[default]
+quit = ["ctrl+q,ctrl+c", "Quit"]
+toggle_sidebar_left = ["ctrl+e", "Sidebar Left"]
+add_note = ["ctrl+a", "Create Stick Note"]
+add_box = ["ctrl+x", "Create Box"]
+save_notes = ["ctrl+s", "Save Notes"]
+unfocus = ["escape", "Unfocus"]
+"app.toggle_dark" = ["ctrl+t", "Dark/Light"]
+
+[moving_drawables]
+left = "h"
+right = "l"
+up = "k"
+down = "j"
+left_5 = "H"
+right_5 = "L"
+up_5 = "K"
+down_5 = "J"
+
+[normal_insert]
+focus_next = "ctrl+i,ctrl+j"
+focus_previous = "ctrl+o,ctrl+k"
+unfocus = "escape"
+
+[normal]
+edit = "i"
+delete = "Q"
+add_note = "o"
+add_box = "O"
+
+[resize_drawable]
+h_plus = "greater_than_sign"
+h_minus = "less_than_sign"
+v_plus = "plus"
+v_minus = "minus"
+
+[bring_drawable]
+forward = "ctrl+f"
+backward = "ctrl+b"

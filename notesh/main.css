@@ -277,6 +277,14 @@ ColorPickerChanger Button.-down {
     background: $accent-darken-3;
 }
 
+ColorPickerChanger Button:focus.-up {
+    background: $accent-lighten-3;
+}
+
+ColorPickerChanger Button:focus.-down {
+    background: $accent-darken-1;
+}
+
 Sidebar #border-picker {
     margin: 0 1 1 1;
 }
@@ -319,4 +327,22 @@ Drawable Resizer{
 
 Drawable Resizer:hover{
     opacity: 80%;
+}
+
+SidebarLeft {    
+    layer: sidebar;
+    dock: left;
+    width: 32;
+    height: 100%;
+    padding: 0 0 0 0;
+    border: outer $accent-darken-3;
+    transition: offset 500ms in_out_cubic;    
+    background: $panel;
+}
+SidebarLeft:focus-within {
+    offset: 0 0 !important;
+}
+
+SidebarLeft.-hidden {
+    offset-x: -100%;
 }
