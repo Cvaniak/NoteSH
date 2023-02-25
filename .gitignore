@@ -1,6 +1,7 @@
 venv/
 __pycache__
 notes.json
+notes*.json
 dist/
 build/
 *.egg-info
