@@ -72,6 +72,10 @@ class Box(Drawable):
     def update_layout(self, duration: float = 1.0):
         base_color = self.color
         border_color = self.border_color
+        if self.is_entered:
+            base_color = base_color.darken(0.1) if base_color.brightness > 0.9 else base_color.lighten(0.1)
+            border_color = border_color.darken(0.1) if border_color.brightness > 0.9 else border_color.lighten(0.1)
+
         self.body.styles.animate("background", value=base_color, duration=duration)
 
         self.body.styles.border = (self.border_type, border_color.darken(0.1))
@@ -98,23 +102,6 @@ class Box(Drawable):
         widgets["multiline_array"].recreate_multiline(str(self.body.body))
         widgets["body_color_picker"].update_colors(self.color)
         widgets["border_color_picker"].update_colors(self.border_color)
-
-    async def on_enter(self, event: events.Enter):
-        if self.is_entered == False:
-            self._last_color: Color = self.color
-            self._last_border_color: Color = self.border_color
-        self.is_entered = True
-        if self._last_color.brightness > 0.9:
-            self.change_color(self._last_color.darken(0.1), duration=0.3)
-            self.change_color(self._last_border_color.darken(0.1), duration=0.3, part_type="border")
-        else:
-            self.change_color(self._last_color.lighten(0.1), duration=0.3)
-            self.change_color(self._last_border_color.lighten(0.1), duration=0.3, part_type="border")
-
-    async def on_leave(self, event: events.Leave):
-        self.is_entered = False
-        self.change_color(self._last_color, duration=0.1)
-        self.change_color(self._last_border_color, duration=0.1, part_type="border")
 
     def dump(self) -> dict[str, Any]:
         return {

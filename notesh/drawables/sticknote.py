@@ -78,7 +78,12 @@ class Note(Drawable):
         self.update_layout(duration)
 
     def update_layout(self, duration: float = 1.0):
-        lighter, default, darker, much_darker = build_color(self.color)
+        base_color = self.color
+        if self.is_entered:
+            base_color = base_color.darken(0.1) if base_color.brightness > 0.9 else base_color.lighten(0.1)
+
+        lighter, default, darker, much_darker = build_color(base_color)
+
         self.spacer.styles.background = much_darker
         self.spacer.styles.color = lighter
 

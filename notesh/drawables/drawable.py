@@ -22,6 +22,7 @@ _T = TypeVar("_T")
 class Drawable(Static):
     can_focus: bool = True
     type: str = "drawable"
+    is_entered: reactive[bool] = reactive(False)
 
     def __init__(
         self,
@@ -45,7 +46,6 @@ class Drawable(Static):
         self.styles.width = size.width
         self.styles.height = size.height
         self.pparent = parent
-        self.is_entered = False
 
         if init_parts:
             self.init_parts()
@@ -78,6 +78,9 @@ class Drawable(Static):
 
     def update_layout(self, duration: float = 1.0):
         base_color = self.color
+        if self.is_entered:
+            base_color = base_color.darken(0.1) if base_color.brightness > 0.9 else base_color.lighten(0.1)
+
         self.body.styles.animate("background", value=base_color, duration=duration)
 
         self.body.styles.border = ("outer", base_color.darken(0.1))
@@ -145,17 +148,16 @@ class Drawable(Static):
         await self.on_leave(cast(events.Leave, event))
 
     async def on_enter(self, event: events.Enter):
-        if self.is_entered == False:
-            self._last_color: Color = self.color
         self.is_entered = True
-        if self._last_color.brightness > 0.9:
-            self.change_color(self._last_color.darken(0.1), duration=0.3)
-        else:
-            self.change_color(self._last_color.lighten(0.1), duration=0.3)
 
     async def on_leave(self, event: events.Leave):
         self.is_entered = False
-        self.change_color(self._last_color, duration=0.1)
+
+    async def watch_is_entered(self, new_value: bool) -> None:
+        if new_value:
+            self.update_layout(duration=0.3)
+        else:
+            self.update_layout(duration=0.1)
 
     def bring_forward(self):
         layers = tuple(x for x in self.screen.styles.layers if x not in [self.layer, f"{self.layer}-resizer"])
