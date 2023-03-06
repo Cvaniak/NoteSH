@@ -89,6 +89,8 @@ class Sidebar(Vertical):
             self.drawable.change_color(color, part_type=part_type)
 
     def on_button_pressed(self, event: Button.Pressed):
+        if not self.drawable:
+            return
         if event.sender.id == "delete-sticknote":
             if not self.drawable:
                 return
@@ -100,6 +102,22 @@ class Sidebar(Vertical):
 
     def on_color_picker_change(self, message: ColorPicker.Change):
         self.change_drawable_color(message.color, message.type)
+
+    def get_child(self, index: Optional[int] = None) -> Optional[Widget]:
+        if index is None:
+            for child in self.widget_list.values():
+                if child.has_class("-hidden"):
+                    continue
+                # Should be change to something pretier
+                if isinstance(child, MultilineArray): 
+                    return child.lines[0]
+                else:
+                    return child
+            return None
+        child: Widget = list(self.widget_list.values())[index%len(self.widget_list)]
+        if child.has_class("-hidden"):
+            return None
+        return child
 
     def toggle_focus(self) -> bool:
         if self.has_class("-hidden"):

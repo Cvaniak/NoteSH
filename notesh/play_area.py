@@ -8,7 +8,9 @@ from textual.containers import Container
 from textual.events import Click, MouseDown, MouseMove, MouseUp
 from textual.geometry import Offset, Size
 from textual.message import Message, MessageTarget
+from textual.reactive import reactive
 from textual.widget import Widget
+from textual.widgets import Static
 
 from notesh.drawables.box import Box
 from notesh.drawables.drawable import Drawable
@@ -19,10 +21,11 @@ CHUNK_SIZE = Offset(20, 5)
 
 
 class PlayArea(Container):
+    can_focus: bool = True
     drawables: list[Drawable] = []
     is_draggin = False
     focused_drawable: Optional[Drawable] = None
-    background_type: str = "plain"
+    background_type: reactive[str] = reactive("plain")
 
     def __init__(
         self,
@@ -98,6 +101,9 @@ class PlayArea(Container):
 
         self.drawables = [note for note in self.drawables if note != drawable]
         drawable.remove()
+        self.focused_drawable = None
+        if len(self.drawables) == 0:
+            self.can_focus = True
 
     async def on_mouse_move(self, event: MouseMove) -> None:
         if event.ctrl and self.is_draggin:
@@ -138,6 +144,7 @@ class PlayArea(Container):
         self.drawables.append(drawable)
         self.mount(drawable)
         self.is_draggin = False
+        self.can_focus = False
 
     async def _move_play_area(self, offset: Offset) -> None:
         self.offset = self.offset + offset

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Type
+from typing import Optional, Type
 
 from textual.app import App, ComposeResult, CSSPathType
 from textual.binding import Binding
@@ -53,13 +53,16 @@ class NoteApp(App):
         yield self.play_area
         yield self.footer
 
+        self.set_focus(self.play_area)
+
     async def action_delete(self):
-        self.play_area.delete_drawable()
-        await self.sidebar.set_drawable(None)
+        await self._delete_drawable()
 
     async def _edit_drawable(self):
-        if self.play_area.focused_drawable is not None:
-            await self.sidebar.set_drawable(self.play_area.focused_drawable, True)
+        if self.play_area.focused_drawable is None:
+            return
+        await self.sidebar.set_drawable(self.play_area.focused_drawable, True)
+        self.set_focus(self.sidebar.get_child())
         self.play_area.can_focus_children = False
 
     async def action_edit(self):
@@ -89,14 +92,24 @@ class NoteApp(App):
         self.play_area.can_focus_children = True
         self.sidebar.set_focus(False)
         self.sidebar_left.set_focus(False)
+        # Already Unfocused
         if self.focused is None:
             return
+        # Unfocuss Fully (forced) or from view with selected one drawable
         if self.focused is self.play_area.focused_drawable or fully:
             self.set_focus(None)
             self.play_area.focused_drawable = None
             return
         self.set_focus(self.play_area.focused_drawable)
         self.play_area.focused_drawable = None
+
+    async def _delete_drawable(self, drawable: Optional[Drawable] = None):
+        self.play_area.delete_drawable(drawable)
+        await self.sidebar.set_drawable(None)
+        if self.play_area.can_focus:
+            self.set_focus(self.play_area)
+        else:
+            await self._unfocus()
 
     async def action_unfocus(self):
         await self._unfocus()
@@ -153,8 +166,8 @@ class NoteApp(App):
         if isinstance(drawable, Drawable):
             await self.sidebar.set_drawable(drawable, message.display_sidebar)
 
-    def on_delete_drawable(self, message: DeleteDrawable) -> None:
-        self.play_area.delete_drawable(message.drawable)
+    async def on_delete_drawable(self, message: DeleteDrawable) -> None:
+        await self._delete_drawable(message.drawable)
 
     def _add_new_drawable(self, new_drawable: Drawable) -> None:
         self.set_focus(new_drawable)

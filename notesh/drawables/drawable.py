@@ -159,6 +159,9 @@ class Drawable(Static):
         else:
             self.update_layout(duration=0.1)
 
+    def next_border(self):
+        ...
+
     def bring_forward(self):
         layers = tuple(x for x in self.screen.styles.layers if x not in [self.layer, f"{self.layer}-resizer"])
         self.screen.styles.layers = layers + (self.styles.layer, f"{self.styles.layer}-resizer")
