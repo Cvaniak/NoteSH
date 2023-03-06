@@ -63,7 +63,7 @@ def save_drawables(file_name: str, drawables: list[Drawable], layers: list[str],
         obj["background"] = background
 
     with open(file_name, "w") as file:
-        json.dump(obj, file)
+        json.dump(obj, file, indent=4)
 
 
 def load_drawables(file_name: str) -> tuple[list[tuple[str, dict[Any, Any]]], Optional[dict[Any, Any]]]:
