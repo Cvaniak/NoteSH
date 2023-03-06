@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from typing import Any, Optional, cast
+from typing import Any, Optional, OrderedDict, cast
+from textual.app import ComposeResult
+from textual.color import Color
 
 from textual.containers import Container
 from textual.events import Click, MouseDown, MouseMove, MouseUp
@@ -11,6 +13,7 @@ from textual.widget import Widget
 from notesh.drawables.box import Box
 from notesh.drawables.drawable import Drawable
 from notesh.drawables.sticknote import Note
+from notesh.drawables.back import Back
 
 CHUNK_SIZE = Offset(20, 5)
 
@@ -19,6 +22,7 @@ class PlayArea(Container):
     drawables: list[Drawable] = []
     is_draggin = False
     focused_drawable: Optional[Drawable] = None
+    background_type: str = "plain"
 
     def __init__(
         self,
@@ -29,14 +33,48 @@ class PlayArea(Container):
         min_size: Size = Size(0, 0),
         max_size: Size = Size(100, 40),
         screen_size: Size = Size(100, 100),
+        color: str = "#444444",
+        border_color: str = "#ffaa00",
     ) -> None:
         super().__init__(*children, name=name, id=id, classes=classes)
         calculated_width, calculated_height = self._calculate_size(min_size, max_size)
         self.styles.width, self.styles.height = calculated_width, calculated_height
         self.offset += self._calculate_additional_offset(screen_size, Size(calculated_width, calculated_height))
+        self.color = Color.parse(color)
+        self.border_color = Color.parse(border_color)
+
+    def compose(self) -> ComposeResult:
+        self.change_color(self.color, duration=0.0)
+        yield from ()
+
+    def change_color(self, new_color: str | Color, duration: float = 1.0, part_type: str = "body") -> None:
+        if isinstance(new_color, str):
+            base_color = Color.parse(new_color)
+        else:
+            base_color = new_color
+
+        if part_type == "" or part_type == "body":
+            self.color = base_color
+        else:
+            self.border_color = base_color
+        self.update_layout(duration)
+    
+    def update_layout(self, duration: float = 1.0):
+        base_color = self.color
+        border_color = self.border_color
+
+        self.styles.animate("background", value=base_color, duration=duration)
+        self.styles.border = ("outer", border_color)
+
+    def sidebar_layout(self, widgets: OrderedDict[str, Widget]) -> None:
+        widgets["body_color_picker"].remove_class("-hidden")
+        widgets["border_color_picker"].remove_class("-hidden")
+
+        widgets["body_color_picker"].update_colors(self.color)
+        widgets["border_color_picker"].update_colors(self.border_color)
 
     def add_new_drawable(self, drawable_type: str) -> Drawable:
-        d = {"note": Note, "box": Box}
+        d = {"note": Note, "box": Box, "back": Back}
         drawable = cast(Drawable, d.get(drawable_type, Drawable)())
         self._mount_drawable(drawable)
 
@@ -123,6 +161,20 @@ class PlayArea(Container):
             self.styles.offset = (self.styles.offset.x.value, self.styles.offset.y.value - CHUNK_SIZE.y)
             for child in self.children:
                 child.styles.offset = (child.styles.offset.x.value, child.styles.offset.y.value + CHUNK_SIZE.y)
+
+    def dump(self) -> dict[str, Any]:
+        return {
+            "color": self.color.hex6,
+            "border_color": self.border_color.hex6,
+            "type": self.background_type,
+        }
+
+    def load(self, obj: Optional[dict[Any, Any]]):
+        if obj is None:
+            return
+        self.color = Color.parse(obj["color"])
+        self.border_color = Color.parse(obj["border_color"])
+        self.background_type = obj["type"]
 
     class Clicked(Message):
         def __init__(

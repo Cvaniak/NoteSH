@@ -30,6 +30,7 @@ def calculate_size_for_file(file_name: str) -> tuple[Size, Size]:
 
     keys = list(obj.keys())
     keys.remove("layers")
+    keys.remove("background")
 
     mxx, mxy = -sys.maxsize, -sys.maxsize
     mnx, mny = sys.maxsize, sys.maxsize
@@ -47,7 +48,7 @@ def calculate_size_for_file(file_name: str) -> tuple[Size, Size]:
     return Size(mnx, mny), Size(mxx, mxy)
 
 
-def save_drawables(file_name: str, drawables: list[Drawable], layers: list[str]) -> None:
+def save_drawables(file_name: str, drawables: list[Drawable], layers: list[str], background: Optional[dict[Any, Any]] = None) -> None:
     obj: dict[str, Any] = {"layers": []}
     layers_set: set[str] = set()
     drawable: Drawable
@@ -58,24 +59,31 @@ def save_drawables(file_name: str, drawables: list[Drawable], layers: list[str])
         layers_set.add(drawable.id)
 
     obj["layers"].extend([x for x in layers if x in layers_set])
+    if background is not None:
+        obj["background"] = background
 
     with open(file_name, "w") as file:
         json.dump(obj, file)
 
 
-def load_drawables(file_name: str) -> list[tuple[str, dict[Any, Any]]]:
+def load_drawables(file_name: str) -> tuple[list[tuple[str, dict[Any, Any]]], Optional[dict[Any, Any]]]:
     if not os.path.exists(file_name):
-        return []
+        return [], None
 
     with open(file_name, "r") as file:
         obj = json.load(file)
 
     if not obj:
-        return []
+        return [], None
+
+    background = None
+    if "background" in obj: 
+        background = obj["background"]
 
     keys = list(obj.keys())
     keys.remove("layers")
-    return [(name, obj[name]) for name in sorted(keys, key=lambda x: obj["layers"].index(x))]
+    keys.remove("background")
+    return [(name, obj[name]) for name in sorted(keys, key=lambda x: obj["layers"].index(x))], background
 
 
 def load_binding_config_file(file_name: str) -> dict[str, Any]:

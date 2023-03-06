@@ -44,6 +44,8 @@ class NoteApp(App):
         min_size, max_size = calculate_size_for_file(self.file)
         self.play_area = PlayArea(min_size=min_size, max_size=max_size, screen_size=self.size)
         self.action_load_notes(min_size)
+        self.sidebar_left.set_play_area(self.play_area)
+
         self._load_key_bindings()
 
         yield self.sidebar
@@ -111,6 +113,10 @@ class NoteApp(App):
         new_drawable = self.play_area.add_new_drawable("box")
         self._add_new_drawable(new_drawable)
 
+    def action_add_back(self) -> None:
+        new_drawable = self.play_area.add_new_drawable("back")
+        self._add_new_drawable(new_drawable)
+
     def action_toggle_sidebar(self) -> None:
         self.sidebar.toggle_focus()
 
@@ -125,13 +131,14 @@ class NoteApp(App):
             self.set_focus(self.sidebar_left.children[0])
 
     def action_save_notes(self) -> None:
-        save_drawables(self.file, self.play_area.drawables, list(self.screen.layers))
+        save_drawables(self.file, self.play_area.drawables, list(self.screen.layers), self.play_area.dump())
 
     def action_load_notes(self, min_size: Size = Size(0, 0)) -> None:
         self.play_area.clear_drawables()
-        drawables = load_drawables(self.file)
+        drawables, background = load_drawables(self.file)
         for name, drawable_obj in drawables:
             self.play_area.add_parsed_drawable(drawable_obj, name, Offset(min_size.width, min_size.height))
+        self.play_area.load(background)
         self.refresh()
 
     async def action_quit(self) -> None:
