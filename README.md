@@ -10,9 +10,12 @@
  <a href="https://github.com/Cvaniak/NoteSH"><img alt="" src="https://raw.githubusercontent.com/Cvaniak/NoteSH/master/documentation/NoteshApp.png" width="100%"></a>
 </p>
 
-## In last Update - Vim/Custom Key bindings
+## In last Update - Change Background Color
 
-In last update you can find support for for custom key bindings. More info in seperate section.
+* You can change background color now!
+* JSON is saved with indent
+* Focus bug fixes
+* Fixed bug that you can't create new Note with some key bindings if there is no notes yet
 
 ## Installation
 
@@ -75,8 +78,6 @@ notesh -f ~/Documents/MyNotes.json
 ## ➕ New Drawable that support borders change
 
 ![Resize Background](https://raw.githubusercontent.com/Cvaniak/NoteSH/master/documentation/NewDrawable.png)
-
-## NEW FEATURES
 
 ## ⌨️  Vim/Custom key bindings
 
@@ -153,6 +154,14 @@ backward = "ctrl+b"
 
 </details>
 
+## NEW FEATURES
+
+## Change Background Color in Left Sidebar
+
+By default you can use `ctrl+e` to open Left Slidebar:
+
+![New note](https://raw.githubusercontent.com/Cvaniak/NoteSH/master/documentation/ChangeBackgroundColor.gif)
+
 ## TODO
 
 There are many thigs to add! If you have idea, please create Issue with your suggestions.
@@ -164,6 +173,7 @@ There are many thigs to add! If you have idea, please create Issue with your sug
 * [ ] Hiding menu (Color Picker etc.)
 * [x] TOML config file
 * [ ] Left Sidebar (for background and preferences)
+  * [x] Background color
 * [ ] Align tool for text
 * [ ] Fixed layers (if needed)
 * [ ] Diffrent Drawables:

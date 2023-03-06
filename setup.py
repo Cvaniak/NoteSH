@@ -7,7 +7,7 @@ long_description = (this_directory / "README.md").read_text()
 
 setup(
     name="Notesh",
-    version="0.6",
+    version="0.7",
     description="NoteSH fully functional sticky notes App in your Terminal!",
     long_description=long_description,
     long_description_content_type="text/markdown",
