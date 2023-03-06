@@ -28,9 +28,7 @@ def calculate_size_for_file(file_name: str) -> tuple[Size, Size]:
     with open(file_name, "r") as file:
         obj = json.load(file)
 
-    keys = list(obj.keys())
-    keys.remove("layers")
-    keys.remove("background")
+    keys = [x for x in obj.keys() if x not in ["background", "layers"]]
 
     mxx, mxy = -sys.maxsize, -sys.maxsize
     mnx, mny = sys.maxsize, sys.maxsize
@@ -80,9 +78,7 @@ def load_drawables(file_name: str) -> tuple[list[tuple[str, dict[Any, Any]]], Op
     if "background" in obj: 
         background = obj["background"]
 
-    keys = list(obj.keys())
-    keys.remove("layers")
-    keys.remove("background")
+    keys = [x for x in obj.keys() if x not in ["background", "layers"]]
     return [(name, obj[name]) for name in sorted(keys, key=lambda x: obj["layers"].index(x))], background
 
 
