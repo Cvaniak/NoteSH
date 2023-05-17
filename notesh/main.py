@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Optional, Type
 
@@ -27,12 +28,17 @@ class NoteApp(App):
         Binding("ctrl+c", "quit", "Quit"),
     ]
 
+    DEFAULT_FILE = os.environ.get(
+        "NOTESH_FILE",
+        str(Path(os.environ.get("XDG_DATA_HOME", Path("~/.local/share").expanduser())) / "notesh" / "notes.json"),
+    )
+
     def __init__(
         self,
         driver_class: Type[Driver] | None = None,
         css_path: CSSPathType = None,
         watch_css: bool = False,
-        file: str = "notes.json",
+        file: str = DEFAULT_FILE,
     ):
         super().__init__(driver_class, css_path, watch_css)
         self.file = file

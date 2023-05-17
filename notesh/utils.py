@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+from pathlib import Path
 import sys
 import uuid
 from functools import partial
@@ -60,6 +61,7 @@ def save_drawables(file_name: str, drawables: list[Drawable], layers: list[str],
     if background is not None:
         obj["background"] = background
 
+    Path(file_name).parent.mkdir(parents=True, exist_ok=True)
     with open(file_name, "w") as file:
         json.dump(obj, file, indent=4)
 
