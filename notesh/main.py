@@ -29,7 +29,15 @@ class NoteApp(App):
 
     DEFAULT_FILE = os.environ.get(
         "NOTESH_FILE",
-        str(Path(os.environ.get("XDG_DATA_HOME", Path("~/.local/share").expanduser())) / "notesh" / "notes.json"),
+        str(
+            (
+                Path(os.getenv("APPDATA", Path.home()))
+                if os.name == "nt"
+                else Path(os.getenv("XDG_DATA_HOME", Path("~/.local/share").expanduser()))
+            )
+            / "notesh"
+            / "notes.json"
+        ),
     )
 
     def __init__(
