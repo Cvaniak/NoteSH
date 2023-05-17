@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Notesh
+Comment=Sticky notes App in your Terminal!
+Exec=python3 -m notesh.main
+Icon=edit
+Terminal=true
+StartupNotify=true

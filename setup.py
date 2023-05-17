@@ -19,6 +19,7 @@ setup(
     install_requires=["textual==0.9.1", "tomli==2.0.1"],
     entry_points={"console_scripts": ["notesh=notesh.command_line:run"]},
     package_data={"notesh": ["*.css", "notesh/*.css", "default_bindings.toml"]},
+    data_files={"share/applications":  ["Notesh.desktop"]}.items(),
     include_package_data=True,
     zip_safe=False,
 )
