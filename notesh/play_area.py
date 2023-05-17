@@ -60,7 +60,7 @@ class PlayArea(Container):
         else:
             self.border_color = base_color
         self.update_layout(duration)
-    
+
     def update_layout(self, duration: float = 1.0):
         base_color = self.color
         border_color = self.border_color

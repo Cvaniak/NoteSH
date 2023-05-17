@@ -109,12 +109,12 @@ class Sidebar(Vertical):
                 if child.has_class("-hidden"):
                     continue
                 # Should be change to something pretier
-                if isinstance(child, MultilineArray): 
+                if isinstance(child, MultilineArray):
                     return child.lines[0]
                 else:
                     return child
             return None
-        child: Widget = list(self.widget_list.values())[index%len(self.widget_list)]
+        child: Widget = list(self.widget_list.values())[index % len(self.widget_list)]
         if child.has_class("-hidden"):
             return None
         return child
