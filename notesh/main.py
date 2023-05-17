@@ -13,8 +13,7 @@ from textual.widgets import Footer
 
 from notesh.drawables.drawable import Drawable
 from notesh.play_area import PlayArea
-from notesh.utils import (calculate_size_for_file, load_binding_config_file,
-                          load_drawables, save_drawables, set_bindings)
+from notesh.utils import calculate_size_for_file, load_binding_config_file, load_drawables, save_drawables, set_bindings
 from notesh.widgets.sidebar import DeleteDrawable, Sidebar
 from notesh.widgets.sidebar_left import SidebarLeft
 

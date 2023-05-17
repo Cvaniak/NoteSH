@@ -47,7 +47,9 @@ def calculate_size_for_file(file_name: str) -> tuple[Size, Size]:
     return Size(mnx, mny), Size(mxx, mxy)
 
 
-def save_drawables(file_name: str, drawables: list[Drawable], layers: list[str], background: Optional[dict[Any, Any]] = None) -> None:
+def save_drawables(
+    file_name: str, drawables: list[Drawable], layers: list[str], background: Optional[dict[Any, Any]] = None
+) -> None:
     obj: dict[str, Any] = {"layers": []}
     layers_set: set[str] = set()
     drawable: Drawable
@@ -77,7 +79,7 @@ def load_drawables(file_name: str) -> tuple[list[tuple[str, dict[Any, Any]]], Op
         return [], None
 
     background = None
-    if "background" in obj: 
+    if "background" in obj:
         background = obj["background"]
 
     keys = [x for x in obj.keys() if x not in ["background", "layers"]]
