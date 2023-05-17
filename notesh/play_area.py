@@ -15,7 +15,6 @@ from textual.widgets import Static
 from notesh.drawables.box import Box
 from notesh.drawables.drawable import Drawable
 from notesh.drawables.sticknote import Note
-from notesh.drawables.back import Back
 
 CHUNK_SIZE = Offset(20, 5)
 
@@ -77,7 +76,7 @@ class PlayArea(Container):
         widgets["border_color_picker"].update_colors(self.border_color)
 
     def add_new_drawable(self, drawable_type: str) -> Drawable:
-        d = {"note": Note, "box": Box, "back": Back}
+        d = {"note": Note, "box": Box}
         drawable = cast(Drawable, d.get(drawable_type, Drawable)())
         self._mount_drawable(drawable)
 
