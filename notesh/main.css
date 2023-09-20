@@ -31,7 +31,7 @@ Note {
     min-height: 6;
     width: 20;
     overflow: hidden;
-    opacity: 0%;
+    opacity: 100%;
 }
 
 Note Static {

@@ -3,7 +3,7 @@ from __future__ import annotations
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import Vertical
-from textual.message import Message, MessageTarget
+from textual.message import Message
 from textual.widgets import Input
 
 from notesh.utils import generate_short_uuid
@@ -19,22 +19,25 @@ class MultilineInput(Input):
     )
 
     def action_cursor_up(self) -> None:
-        self.emit_no_wait(self.Arrow(self, "up"))
+        self.post_message(self.Arrow(self, "up"))
 
     def action_cursor_down(self) -> None:
-        self.emit_no_wait(self.Arrow(self, "down"))
+        self.post_message(self.Arrow(self, "down"))
 
     def action_delete_left(self) -> None:
         super().action_delete_left()
         if not self.value:
-            self.emit_no_wait(self.Backspace(self))
+            self.post_message(self.Backspace(self))
 
     class Backspace(Message):
-        ...
+        def __init__(self, multiline_input: MultilineInput) -> None:
+            super().__init__()
+            self.multiline_input = multiline_input
 
     class Arrow(Message):
-        def __init__(self, sender: MessageTarget, top_down: str) -> None:
-            super().__init__(sender)
+        def __init__(self, multiline_input: MultilineInput, top_down: str) -> None:
+            super().__init__()
+            self.multiline_input = multiline_input
             self.top_down = top_down
 
 
@@ -46,24 +49,24 @@ class MultilineArray(Vertical):
             yield line
 
     def on_input_submitted(self, event: Input.Submitted):
-        idx = self.lines.index(event.sender)
+        idx = self.lines.index(event.input)
         new_input = MultilineInput("", id=f"sidebar-input-{generate_short_uuid()}")
         self.lines.insert(idx + 1, new_input)
-        self.mount(new_input, after=event.sender)
+        self.mount(new_input, after=event.input)
         self.screen.set_focus(new_input)
 
     def on_multiline_input_backspace(self, event: MultilineInput.Backspace):
-        if event.sender not in self.lines:
+        if event.multiline_input not in self.lines:
             return
-        idx = self.lines.index(event.sender)
+        idx = self.lines.index(event.multiline_input)
         if len(self.lines) >= 2:
-            self.lines.remove(event.sender)
-            event.sender.remove()
+            self.lines.remove(event.multiline_input)
+            event.multiline_input.remove()
             if self.lines:
                 self.screen.set_focus(self.lines[idx - 1])
 
     def on_multiline_input_arrow(self, event: MultilineInput.Arrow):
-        idx = self.lines.index(event.sender)
+        idx = self.lines.index(event.multiline_input)
         n = len(self.lines)
         if event.top_down == "up":
             if idx == 0:
@@ -84,11 +87,11 @@ class MultilineArray(Vertical):
 
     async def on_input_changed(self, event: MultilineInput.Changed):
         event.stop()
-        await self.emit(self.Changed(self))
+        self.post_message(self.Changed(self))
 
     class Changed(Message):
         def __init__(self, sender: MultilineArray) -> None:
-            super().__init__(sender)
+            super().__init__()
             self.input = sender
 
     # async def on_key(self, event: events.Key):

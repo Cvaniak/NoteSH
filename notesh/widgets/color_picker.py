@@ -6,7 +6,7 @@ from textual.app import ComposeResult
 from textual.color import Color
 from textual.containers import Grid, Horizontal, Vertical
 from textual.events import MouseScrollDown, MouseScrollUp
-from textual.message import Message, MessageTarget
+from textual.message import Message
 from textual.reactive import reactive
 from textual.widget import Widget
 from textual.widgets import Button, Static
@@ -52,9 +52,10 @@ class ColorPickerChanger(Grid):
 
     def on_button_pressed(self, event: Button.Pressed):
         new_value = 0
-        if event.sender.id == "up":
+        button_id = event.button.id
+        if button_id == "up":
             new_value = 10
-        if event.sender.id == "down":
+        if button_id == "down":
             new_value = -10
 
         _value = getattr(self.pparent, self.argument) + new_value
@@ -116,10 +117,11 @@ class ColorPicker(Vertical):
         for c in self.color_changers:
             self.color_changers[c].value = getattr(self, c)
 
-        await self.emit(self.Change(self, color, argument=self.type))
+        self.post_message(self.Change(color, argument=self.type))
 
     def on_button_pressed(self, event: Button.Pressed):
-        if event.sender.id == "random-color":
+        button_id = event.button.id
+        if button_id == "random-color":
             for i in "rgb":
                 setattr(self, i, randint(30, 220))
 
@@ -146,7 +148,7 @@ class ColorPicker(Vertical):
         await self.update_color()
 
     class Change(Message):
-        def __init__(self, sender: MessageTarget, color: Color | str, argument: str) -> None:
-            super().__init__(sender)
+        def __init__(self, color: Color | str, argument: str) -> None:
+            super().__init__()
             self.color = color
             self.type = argument

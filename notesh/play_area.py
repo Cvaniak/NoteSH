@@ -7,10 +7,9 @@ from textual.color import Color
 from textual.containers import Container
 from textual.events import Click, MouseDown, MouseMove, MouseUp
 from textual.geometry import Offset, Size
-from textual.message import Message, MessageTarget
+from textual.message import Message
 from textual.reactive import reactive
 from textual.widget import Widget
-from textual.widgets import Static
 
 from notesh.drawables.box import Box
 from notesh.drawables.drawable import Drawable
@@ -118,7 +117,7 @@ class PlayArea(Container):
         self.capture_mouse(False)
 
     async def on_click(self, event: Click) -> None:
-        await self.emit(PlayArea.Clicked(self))
+        self.post_message(PlayArea.Clicked())
 
     async def on_drawable_move(self, event: Drawable.Move) -> None:
         await self._resize_field_to_drawable(event.drawable, event.offset)
@@ -185,6 +184,5 @@ class PlayArea(Container):
     class Clicked(Message):
         def __init__(
             self,
-            sender: MessageTarget,
         ) -> None:
-            super().__init__(sender)
+            super().__init__()

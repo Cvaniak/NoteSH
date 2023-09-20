@@ -4,11 +4,12 @@ import os
 from pathlib import Path
 from typing import Optional, Type
 
-from textual.app import App, ComposeResult, CSSPathType
+from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.driver import Driver
 from textual.geometry import Offset, Size
 from textual.keys import KEY_ALIASES
+from textual.types import CSSPathType
 from textual.widgets import Footer
 
 from notesh.drawables.drawable import Drawable
@@ -20,7 +21,7 @@ from notesh.widgets.sidebar_left import SidebarLeft
 KEY_ALIASES["backspace"] = ["ctrl+h"]
 
 
-class NoteApp(App):
+class NoteApp(App[None]):
     CSS_PATH = "main.css"
 
     BINDINGS = [
@@ -47,7 +48,7 @@ class NoteApp(App):
         watch_css: bool = False,
         file: str = DEFAULT_FILE,
     ):
-        super().__init__(driver_class, css_path, watch_css)
+        super().__init__()
         self.file = file
         self.footer = Footer()
         self.sidebar_left = SidebarLeft(classes="-hidden")
@@ -200,7 +201,7 @@ class NoteApp(App):
         set_bindings(self, conf["normal_insert"])
         set_bindings(self.play_area, conf["normal"])
 
-        self.footer._focus_changed(None)  # type: ignore
+        # self.footer.set_focus(None)  # type: ignore
 
 
 if __name__ == "__main__":

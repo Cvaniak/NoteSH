@@ -7,7 +7,7 @@ long_description = (this_directory / "README.md").read_text()
 
 setup(
     name="Notesh",
-    version="0.7",
+    version="0.8",
     description="NoteSH fully functional sticky notes App in your Terminal!",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -16,7 +16,7 @@ setup(
     author_email="igna.cwaniak@gmail.com",
     packages=["notesh", "notesh/drawables", "notesh/widgets"],
     python_requires=">=3.7, <4",
-    install_requires=["textual==0.9.1", "tomli==2.0.1"],
+    install_requires=["textual==0.37.1", "tomli==2.0.1"],
     entry_points={"console_scripts": ["notesh=notesh.command_line:run"]},
     package_data={"notesh": ["*.css", "notesh/*.css", "default_bindings.toml"]},
     data_files={"share/applications":  ["Notesh.desktop"]}.items(),

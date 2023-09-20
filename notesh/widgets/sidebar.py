@@ -5,7 +5,7 @@ from typing import Optional, OrderedDict
 from textual.app import ComposeResult
 from textual.color import Color
 from textual.containers import Vertical
-from textual.message import Message, MessageTarget
+from textual.message import Message
 from textual.widget import Widget
 from textual.widgets import Button, Input
 
@@ -16,8 +16,8 @@ from notesh.widgets.multiline_input import MultilineArray
 
 
 class DeleteDrawable(Message):
-    def __init__(self, sender: MessageTarget, drawable: Drawable) -> None:
-        super().__init__(sender)
+    def __init__(self, drawable: Drawable) -> None:
+        super().__init__()
         self.drawable = drawable
 
 
@@ -91,13 +91,14 @@ class Sidebar(Vertical):
     def on_button_pressed(self, event: Button.Pressed):
         if not self.drawable:
             return
-        if event.sender.id == "delete-sticknote":
+        button_id = event.button.id
+        if button_id == "delete-sticknote":
             if not self.drawable:
                 return
-            self.emit_no_wait(DeleteDrawable(self, self.drawable))
-            self.screen.query_one(PlayArea).emit_no_wait(DeleteDrawable(self, self.drawable))
+            self.post_message(DeleteDrawable(self.drawable))
+            self.screen.query_one(PlayArea).post_message(DeleteDrawable(self.drawable))
             self.refresh()
-        if event.sender.id == "border-picker":
+        if button_id == "border-picker":
             self.drawable.next_border()
 
     def on_color_picker_change(self, message: ColorPicker.Change):

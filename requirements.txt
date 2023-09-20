@@ -1,2 +1,2 @@
-textual==0.9.1
+textual
 tomli

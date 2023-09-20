@@ -125,7 +125,7 @@ class Note(Drawable):
             "title": self.title.body,
             "body": self.body.body,
             "pos": (self.styles.offset.x.value, self.styles.offset.y.value),
-            "color": self._last_color.hex6,
+            "color": self.color.hex6,
             "size": (self.styles.width.value, self.styles.height.value),
             "type": self.type,
         }

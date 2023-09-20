@@ -8,7 +8,7 @@ from textual.app import ComposeResult
 from textual.color import Color
 from textual.containers import Vertical
 from textual.geometry import Offset, Size
-from textual.message import Message, MessageTarget
+from textual.message import Message
 from textual.reactive import reactive
 from textual.widget import Widget
 from textual.widgets import Input, Static
@@ -41,7 +41,6 @@ class Drawable(Static):
         self.clicked = (0, 0)
         self.styles.layer = f"{id}"
         self.color = Color.parse(color)
-        self._last_color = self.color
         self.styles.offset = pos
         self.styles.width = size.width
         self.styles.height = size.height
@@ -91,7 +90,7 @@ class Drawable(Static):
     async def drawable_is_moved_from_key(self, offset: Offset):
         note = self
         note.offset = note.offset + offset
-        await self.emit(Drawable.Move(self, drawable=self, offset=offset))
+        self.post_message(Drawable.Move(drawable=self, offset=offset))
 
     async def move(self, direction: str, value: int = 1):
         d = {"up": (0, -1), "down": (0, 1), "left": (-1, 0), "right": (1, 0)}
@@ -103,12 +102,12 @@ class Drawable(Static):
             note = self
             if event.delta:
                 note.offset = note.offset + event.delta
-                await self.emit(Drawable.Move(self, drawable=self, offset=event.delta))
+                self.post_message(Drawable.Move(drawable=self, offset=event.delta))
 
     async def drawable_is_focused(self, event: events.MouseEvent, display_sidebar: bool = False):
         self.clicked = event.offset
         self.bring_forward()
-        await self.emit(Drawable.Focus(self, self.note_id, display_sidebar))
+        self.post_message(Drawable.Focus(self.note_id, display_sidebar))
 
     async def drawable_is_unfocused(self, event: events.MouseUp) -> None:
         self.clicked = None
@@ -124,7 +123,8 @@ class Drawable(Static):
             await self.resize_drawable(event.delta_x, event.delta_y)
 
     async def on_mouse_move(self, event: events.MouseMove) -> None:
-        await self.drawable_is_moved(event)
+        ...
+        # await self.drawable_is_moved(event)
 
     async def on_mouse_down(self, event: events.MouseDown) -> None:
         if self.app.mouse_captured is None:
@@ -137,12 +137,12 @@ class Drawable(Static):
         await self.drawable_is_unfocused(event)
 
     async def on_click(self, event: events.Click):
-        await self.emit(Drawable.Clicked(self, drawable=self))
+        self.post_message(Drawable.Clicked(drawable=self))
         event.stop()
 
     async def on_focus(self, event: events.Focus):
         await self.on_enter(cast(events.Enter, event))
-        await self.emit(Drawable.Focus(self, self.note_id, False))
+        self.post_message(Drawable.Focus(self.note_id, False))
 
     async def on_blur(self, event: events.Blur):
         await self.on_leave(cast(events.Leave, event))
@@ -186,7 +186,7 @@ class Drawable(Static):
         return {
             "body": self.body.body,
             "pos": (self.styles.offset.x.value, self.styles.offset.y.value),
-            "color": self._last_color.hex6,
+            "color": self.color.hex6,
             "size": (self.styles.width.value, self.styles.height.value),
             "type": self.type,
         }
@@ -202,24 +202,23 @@ class Drawable(Static):
         )
 
     class Mess(Message):
-        def __init__(self, sender: MessageTarget, value: str | None) -> None:
-            super().__init__(sender)
+        def __init__(self, value: str | None) -> None:
+            super().__init__()
             self.value = value
 
     class Focus(Message):
-        def __init__(self, sender: MessageTarget, index: str, display_sidebar: bool = False) -> None:
-            super().__init__(sender)
+        def __init__(self, index: str, display_sidebar: bool = False) -> None:
+            super().__init__()
             self.index = index
             self.display_sidebar = display_sidebar
 
     class Move(Message):
         def __init__(
             self,
-            sender: MessageTarget,
             drawable: Drawable,
             offset: Offset,
         ) -> None:
-            super().__init__(sender)
+            super().__init__()
             self.drawable = drawable
             # this offset is used because when we update drawable offset
             # it does not update region and style until first idle
@@ -228,10 +227,9 @@ class Drawable(Static):
     class Clicked(Message):
         def __init__(
             self,
-            sender: MessageTarget,
             drawable: Drawable,
         ) -> None:
-            super().__init__(sender)
+            super().__init__()
             self.drawable = drawable
 
 
@@ -274,6 +272,7 @@ class DrawablePart(Static):
 
 class Body(DrawablePart):
     async def on_mouse_move(self, event: events.MouseMove) -> None:
+        ...
         await self.pparent.drawable_is_moved(event)
 
 
