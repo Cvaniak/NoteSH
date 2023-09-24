@@ -93,8 +93,3 @@ class MultilineArray(Vertical):
         def __init__(self, sender: MultilineArray) -> None:
             super().__init__()
             self.input = sender
-
-    # async def on_key(self, event: events.Key):
-    #     print(self.app.rkk)
-    #     if event.key in self.app.rkk:
-    #         event.stop()

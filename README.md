@@ -10,12 +10,12 @@
  <a href="https://github.com/Cvaniak/NoteSH"><img alt="" src="https://raw.githubusercontent.com/Cvaniak/NoteSH/master/documentation/NoteshApp.png" width="100%"></a>
 </p>
 
-## In last Update - Change Background Color
+## In last Update 
 
-* You can change background color now!
-* JSON is saved with indent
-* Focus bug fixes
-* Fixed bug that you can't create new Note with some key bindings if there is no notes yet
+* [**Hoptex**](https://github.com/Cvaniak/Hoptex) Support (you can focus anything easy now)! 
+* User default note file
+
+![Hoptex Usage](https://raw.githubusercontent.com/Cvaniak/NoteSH/master/documentation/HoptexNotesh.gif)
 
 ## Installation
 
@@ -150,17 +150,23 @@ v_minus = "minus"
 [bring_drawable]
 forward = "ctrl+f"
 backward = "ctrl+b"
+
+[hoptex]
+focus = "ctrl+n"
+quit = "escape,ctrl+c"
+unfocus = "escape,ctrl+c"
 ```
 
 </details>
 
-## NEW FEATURES
 
 ## Change Background Color in Left Sidebar
 
-By default you can use `ctrl+e` to open Left Slidebar:
+By default you can use `ctrl+e` to open Left Sidebar:
 
 ![New note](https://raw.githubusercontent.com/Cvaniak/NoteSH/master/documentation/ChangeBackgroundColor.gif)
+
+## NEW FEATURES
 
 ## TODO
 
@@ -179,6 +185,10 @@ There are many thigs to add! If you have idea, please create Issue with your sug
 * [ ] Diffrent Drawables:
   * [ ] Check List
   * [ ] Arrows
+* [ ] Help Screen
+* [ ] Command Pallet support 
+* [ ] Menu to choose borders
+* [ ] Buttons to add new notes
 
 and also resolve problems:
 

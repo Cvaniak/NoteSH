@@ -1,5 +1,5 @@
 [default]
-quit = ["ctrl+q,ctrl+c", "Quit"]
+quit = ["ctrl+q", "Quit"]
 toggle_sidebar_left = ["ctrl+e", "Sidebar Left"]
 add_note = ["ctrl+a", "Create Stick Note"]
 add_box = ["ctrl+x", "Create Box"]
@@ -37,3 +37,8 @@ v_minus = "minus"
 [bring_drawable]
 forward = "ctrl+f"
 backward = "ctrl+b"
+
+[hoptex]
+focus = "ctrl+n"
+quit = "escape,ctrl+c"
+unfocus = "escape,ctrl+c"

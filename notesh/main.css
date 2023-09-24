@@ -346,3 +346,7 @@ SidebarLeft:focus-within {
 SidebarLeft.-hidden {
     offset-x: -100%;
 }
+
+HopScreen {
+    background: 0%;
+}

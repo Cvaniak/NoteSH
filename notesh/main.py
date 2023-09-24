@@ -2,25 +2,44 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Optional, Type
+from typing import Optional
 
 from textual.app import App, ComposeResult
 from textual.binding import Binding
-from textual.driver import Driver
 from textual.geometry import Offset, Size
 from textual.keys import KEY_ALIASES
-from textual.types import CSSPathType
-from textual.widgets import Footer
+from textual.widget import Widget
 
 from notesh.drawables.drawable import Drawable
 from notesh.play_area import PlayArea
 from notesh.utils import calculate_size_for_file, load_binding_config_file, load_drawables, save_drawables, set_bindings
+from notesh.widgets.focusable_footer import FocusableFooter
 from notesh.widgets.sidebar import DeleteDrawable, Sidebar
 from notesh.widgets.sidebar_left import SidebarLeft
+from hoptex.configs import HoptexBindingConfig
+from hoptex.decorator import hoptex
 
 KEY_ALIASES["backspace"] = ["ctrl+h"]
 
 
+def load_confing_hoptex():
+    conf = load_binding_config_file(str(Path(__file__).parent / "default_bindings.toml"))
+    conf.update(load_binding_config_file(str(Path(__file__).parent / "user_bindings.toml")))
+    return conf.get("hoptex", {})
+
+
+# Not perfect solution to load file here,
+# but cant load confing for hoptex other way
+hoptex_conf = load_confing_hoptex()
+
+hoptex_binding = HoptexBindingConfig(
+    focus=hoptex_conf.get("hoptex_focus", "ctrl+n"),
+    quit=hoptex_conf.get("hoptex_quit", "escape,ctrl+c"),
+    unfocus="",
+)
+
+
+@hoptex(bindings=hoptex_binding)
 class NoteApp(App[None]):
     CSS_PATH = "main.css"
 
@@ -43,14 +62,12 @@ class NoteApp(App[None]):
 
     def __init__(
         self,
-        driver_class: Type[Driver] | None = None,
-        css_path: CSSPathType = None,
         watch_css: bool = False,
         file: str = DEFAULT_FILE,
     ):
-        super().__init__()
+        super().__init__(watch_css=watch_css)
         self.file = file
-        self.footer = Footer()
+        self.footer = FocusableFooter()
         self.sidebar_left = SidebarLeft(classes="-hidden")
         self.sidebar = Sidebar(classes="-hidden")
 
@@ -66,8 +83,9 @@ class NoteApp(App[None]):
         yield self.sidebar_left
         yield self.play_area
         yield self.footer
+        self._hoptex_parent_widgets: set[Widget] = {self.play_area}
 
-        self.set_focus(self.play_area)
+        self.set_focus(self.footer)
 
     async def action_delete(self):
         await self._delete_drawable()
@@ -75,6 +93,7 @@ class NoteApp(App[None]):
     async def _edit_drawable(self):
         if self.play_area.focused_drawable is None:
             return
+        self._hoptex_parent_widgets.add(self.sidebar)
         await self.sidebar.set_drawable(self.play_area.focused_drawable, True)
         self.set_focus(self.sidebar.get_child())
         self.play_area.can_focus_children = False
@@ -102,16 +121,18 @@ class NoteApp(App[None]):
         if self.play_area.focused_drawable is not None:
             await self.play_area.focused_drawable.resize_drawable(*d[direction])
 
-    async def _unfocus(self, fully: bool = False):
+    def _unfocus(self, fully: bool = False):
         self.play_area.can_focus_children = True
         self.sidebar.set_focus(False)
         self.sidebar_left.set_focus(False)
+        self._hoptex_parent_widgets.discard(self.sidebar)
+        self._hoptex_parent_widgets.discard(self.sidebar_left)
         # Already Unfocused
         if self.focused is None:
             return
         # Unfocuss Fully (forced) or from view with selected one drawable
         if self.focused is self.play_area.focused_drawable or fully:
-            self.set_focus(None)
+            self.set_focus(self.footer)
             self.play_area.focused_drawable = None
             return
         self.set_focus(self.play_area.focused_drawable)
@@ -123,10 +144,10 @@ class NoteApp(App[None]):
         if self.play_area.can_focus:
             self.set_focus(self.play_area)
         else:
-            await self._unfocus()
+            self._unfocus()
 
     async def action_unfocus(self):
-        await self._unfocus()
+        self._unfocus()
 
     def action_add_note(self) -> None:
         new_drawable = self.play_area.add_new_drawable("note")
@@ -140,20 +161,21 @@ class NoteApp(App[None]):
         new_drawable = self.play_area.add_new_drawable("box")
         self._add_new_drawable(new_drawable)
 
-    def action_add_back(self) -> None:
-        new_drawable = self.play_area.add_new_drawable("back")
-        self._add_new_drawable(new_drawable)
-
     def action_toggle_sidebar(self) -> None:
-        self.sidebar.toggle_focus()
+        if self.sidebar.toggle_focus():
+            self._hoptex_parent_widgets.add(self.sidebar)
+        else:
+            self._hoptex_parent_widgets.discard(self.sidebar)
 
     def action_toggle_sidebar_left(self) -> None:
         if not self.sidebar_left.toggle_focus():
+            self._hoptex_parent_widgets.discard(self.sidebar_left)
             focus_candidat = self.play_area.focused_drawable
             self.play_area.can_focus_children = True
             if focus_candidat is not None:
                 self.set_focus(focus_candidat)
         else:
+            self._hoptex_parent_widgets.add(self.sidebar_left)
             self.play_area.can_focus_children = False
             self.set_focus(self.sidebar_left.children[0])
 
@@ -173,7 +195,7 @@ class NoteApp(App[None]):
         self.exit()  # type: ignore
 
     async def on_play_area_clicked(self, message: PlayArea.Clicked):
-        await self._unfocus(fully=True)
+        self._unfocus(fully=True)
 
     async def on_drawable_focus(self, message: Drawable.Focus):
         drawable = self.screen.get_widget_by_id(message.index)
@@ -201,9 +223,7 @@ class NoteApp(App[None]):
         set_bindings(self, conf["normal_insert"])
         set_bindings(self.play_area, conf["normal"])
 
-        # self.footer.set_focus(None)  # type: ignore
-
 
 if __name__ == "__main__":
-    app = NoteApp()
+    app = NoteApp(watch_css=True)
     app.run()  # type: ignore

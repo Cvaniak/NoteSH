@@ -6,7 +6,8 @@ from pathlib import Path
 import sys
 import uuid
 from functools import partial
-from typing import TYPE_CHECKING, Any, Callable, Coroutine, Optional
+from typing import TYPE_CHECKING, Any, Callable, Coroutine, Optional, Union
+from textual.app import App
 
 import tomli
 from textual.geometry import Size
@@ -15,7 +16,6 @@ if TYPE_CHECKING:
     from textual.containers import Container
 
     from notesh.drawables.drawable import Drawable
-    from notesh.main import NoteApp
 
 
 def generate_short_uuid() -> str:
@@ -87,15 +87,18 @@ def load_drawables(file_name: str) -> tuple[list[tuple[str, dict[Any, Any]]], Op
 
 
 def load_binding_config_file(file_name: str) -> dict[str, Any]:
-    if not os.path.exists(file_name):
+    try:
+        if not os.path.exists(file_name):
+            return {}
+        with open(file_name, "rb") as f:
+            conf = tomli.load(f)
+        return conf
+    except (FileNotFoundError, PermissionError, tomli.TOMLDecodeError):
         return {}
-    with open(file_name, "rb") as f:
-        conf = tomli.load(f)
-    return conf
 
 
 def set_bindings(
-    where: Container | NoteApp,
+    where: Union[Container, App[None]],
     config: dict[str, list[str] | str],
     show: bool = False,
     func: Optional[Callable[..., Coroutine[Any, Any, Any]]] = None,
